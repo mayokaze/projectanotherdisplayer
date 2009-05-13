@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" xmlns:local="org.tamaki.video.*" height="604" width="530" creationComplete="callLater(init)" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+ <mx:Script>
+		<![CDATA[
+			import org.tamaki.localSystem.LocalInfo;
+			import org.tamaki.localSystem.LocalLoader;
+			import mx.events.ResizeEvent;
+			import mx.collections.ArrayCollection;
+			import mx.events.SliderEvent;
+			import mx.controls.Alert;
+		    import mx.utils.StringUtil
+		    import flash.events.FullScreenEvent
+		  //  import org.tamaki.util.*
+		    import org.tamaki.video.*
+		    import org.tamaki.events.*
+		    import org.tamaki.comment.*
+		    import org.tamaki.net.*
+
+		     
+		    private var vl:VideoLoader = new VideoLoader()
+		    private var cl:CommentLoader = new CommentLoader()
+		    private var al:ACLoader = new ACLoader
+		    private var ll:LocalLoader = new LocalLoader
+		    private var cm:CommentManager 
+		    private var tot:String ;
+		    private var anyLoaded:Boolean = false	
+		    
+
+		    private function init():void //suck suck suck calllater TAT
+			{
+/* 				var ss:Array = this.getURLS("http://222.243.146.200/html/game/20090512/30237_5.html")
+				for each(var s:String in ss)
+				{
+					trace(s)
+				} */
+			//	this.addEventListener(ResizeEvent.RESIZE,resize)
+		/*	trace(this.nsm.width)
+			trace(this.nsm.height)
+			// this.nsm.resize()
+				
+	       
+			//  test for cf
+			var cf:CommentFactory = new CommentFactory
+			   for(var i:int = 0;i<50;i++)
+			   {
+			   	var comm:Comment = cf.instanceComment()
+			   	//trace(comm.isManaged)
+			   	//trace (cf.dumpComment(comm)+" "+i)
+			   }
+	           trace (cf.dumpComment(comm))
+			//    cf.instanceComment()
+			   trace( cf.dumpComment(cf.instanceComment()))*/
+	/* 		   var xl:XMLoader = new XMLoader
+			    var vl:VideoLoader = new VideoLoader
+			   var cl:CommentLoader = new CommentLoader
+			   var rs:RegexSearcher = new RegexSearcher(/test/)
+			   var mvl:MultiVideoLoader = new MultiVideoLoader
+			   var mcl:MultiCommentLoader = new MultiCommentLoader
+			   var adl:ACLoader = new ACLoader */
+			   this.cm = new CommentManager(nsm)
+			   trace("test")
+ 			   nsm.addEventListener(NMEvent.PROGRESS,onProgress)
+		       nsm.addEventListener(NMEvent.PLAY_HEAD_UPDATE,onPlayHeadChange)
+		       nsm.addEventListener(NMEvent.COMPLETE,refresh)
+		       nsm.addEventListener(NMEvent.VIDEO_NOT_FOUND,onNotFound)
+		       nsm.addEventListener(NMEvent.URL_COMPLETE,onMetaLoad)
+		       vl.addEventListener(LoadEvent.VIDEO_COMPLETE,onVideoLoad)
+		       cl.addEventListener(LoadEvent.COMMENT_COMPLETE,onCommentLoad)
+		       al.addEventListener(LoadEvent.MULTI_PART_COMPLETE,onPartLoad)
+		       ll.addEventListener(LoadEvent.LOACL_LOAD_COMPLETE,onLocalLoad)
+		       this.stage.addEventListener(FullScreenEvent.FULL_SCREEN,fsHandler) 
+            //   this.loadURL("http://gz6.dhot.v.iask.com/f/1/e985a69924550d308928fe03f66dc99720300225.flv",new Array)
+		      
+		       // testcommentLoader&container
+		   /* 	 var cl:CommentLoader = new CommentLoader()
+			  cl.addEventListener(LoadEvent.COMMENT_COMPLETE,onComment)
+			  
+			  cl.loadComment("20186544")
+			   trace(nsm.stage.width)
+			   trace(nsm.stage.height)*/
+			  
+		   }
+		     
+		     //note:damm...typycast is now invalid use "as" instead
+		/*private function onComment(eve:LoadEvent):void
+		   
+		   {
+		   //   var cds:Array = eve.info as Array
+		   	 for(var i :uint = 0;i< eve.info.length;i++)
+		   	 {
+		   	 	trace(CommentData(eve.info[i]).txt)
+		   	 }
+		   	 /*var dl:DataList = new DataList(cds )
+		   	 for(i =0;i<=120;i++)
+		   	 {
+		   	 	while(dl.hasNext(i))
+		   	 	{  
+		   	 		trace("second"+i+"---------------")
+		   	 		var cd:CommentData = dl.nextComment(i)
+		   	 		trace (cd.txt)
+		   	 		trace (cd.width)
+		   	 		trace (cd.height)
+		   	 	}
+		   	 }
+		   	 
+		   }*/
+		/*    private function resize(eve:ResizeEvent):void
+		    {
+		    	this.nsm.width = this.width
+		    	this.nsm.height = this.height * 35 /53
+		    }*/
+		    
+		    /*  		private function getURLS(url:String):Array
+		{
+		  var us:Array = new Array
+		  var idx:int =  url.indexOf("_")
+		  if(idx > 0)
+		  {
+		  	var count:int = int(url.charAt(idx+1))
+		  	var base:String = url.substring(0,idx)
+		  	var postfix:String = ".html"
+		  	us.push(base + postfix)
+		  	for(var i:int = 2;i <= count;i++)
+		  	{
+		  		us.push(base + "_" + i + postfix)
+		  	}
+		  }
+		  else
+		   us.push(url)
+		  return us 	 
+		} */
+		   private function loadURL(url:String,cds:Array):void
+		   {
+		   	this.cm.init(cds)
+		   	this.nsm.initBySingleUrl(url)
+		    } 
+		   private function onLoad(eve:Event):void
+		    {
+		    	if(!this.ec.selected)
+		         return
+		       this.ec.selected = false  
+		       var ipts:String = StringUtil.trim(input.text)
+		       if(ipts.indexOf("http")>=0)
+		       {
+		       //	trace("input" + ipts)
+		       	al.loadParts(ipts)
+		       }
+		       else
+		       {
+		       //	trace("input" + ipts)
+		        vl.loadVideo(ipts)
+			    cl.loadComment(ipts)
+		       }
+			   this.pb.enabled = false
+			   this.cob.enabled = false
+               
+		   }
+		   private function onCommentLoad(eve:LoadEvent):void
+		    {
+		    	this.cm.init(eve.info as Array)
+		    	if(this.anyLoaded)
+		    	 {
+		    	 	this.pb.enabled = true
+		    	 	this.nsm.play()
+		    	 	this.pb.label = "pause"
+		    	 	this.anyLoaded = false
+		    	 	this.cob.enabled = true
+		    	 }
+		    	 else
+		    	 this.anyLoaded = true
+		    } 
+		    private function onVideoLoad(eve:LoadEvent):void
+		    {   
+		       var ifd:InfoData = InfoData(eve.info)
+		      //	trace(ifd.total)
+		      //	var ifs:Array = ifd.infos
+		      	this.nsm.init(ifd.infos,ifd.total)
+		     	this.nsm.stop()
+		        this.vs.enabled = true
+		      	this.ps.enabled = true
+		    //  	ec.selected = false
+		      	ps.maximum = nsm.total
+		      	tot =  Math.round(nsm.total/1000).toString()
+		      	tl.text = "0/" + tot
+		      	this.vs.value = nsm.volume
+		      	if(this.anyLoaded)
+		      	{
+		      	    this.pb.enabled = true
+		    	 	this.nsm.play()
+		    	 	this.pb.label = "pause"
+		    	 	this.anyLoaded = false
+		    	 	this.cob.enabled = true
+		      	}
+		      	else
+		      	this.anyLoaded = true
+		   }
+		    private function onPartLoad(eve:LoadEvent):void
+		    {
+		    //	trace("all complete")
+		    	var  mifd:MultiInfoData = MultiInfoData(eve.info) 
+		    //	trace(mifd.ifd.infos.length)
+		    //	trace(mifd.ifd.total)
+		    	this.nsm.init(mifd.ifd.infos,mifd.ifd.total)
+		    	this.nsm.stop()
+                ps.maximum = nsm.total
+		      	tot =  Math.round(nsm.total/1000).toString()
+		      	tl.text = "0/" + tot
+		      	this.vs.value = nsm.volume
+		      	this.cm.init(mifd.cds)
+		      //	trace(mifd.cds.length)
+		      	this.nsm.play()
+		        this.vs.enabled = true
+		      	this.ps.enabled = true
+		      	this.pb.enabled = true
+		    	this.pb.label = "pause"
+		     // 	ec.selected = false
+		      	this.cob.enabled = true
+		      	this.al.reset()
+		    }
+		    
+		    private function onMetaLoad(eve:NMEvent):void
+		    {
+		   // trace("onMeta")
+		    this.nsm.stop() 
+		   	tot =  Math.round(nsm.total/1000).toString()
+		    this.ps.maximum = nsm.total
+		   // trace(nsm.total)
+		    tl.text = "0/" + tot
+		    this.vs.value = nsm.volume
+		    this.cob.enabled = true
+		    this.vs.enabled = true
+		    this.ps.enabled = true 
+		    this.nsm.play()
+		    this.pb.label = "pause"
+		    }
+		    
+			private function onFS(eve:Event):void
+			{
+			var screenRectangle:Rectangle = new Rectangle(nsm.x, nsm.y, nsm.width, nsm.height); 
+            stage.fullScreenSourceRect = screenRectangle;   
+            stage.displayState = StageDisplayState.FULL_SCREEN;
+         //   this.cm.fullScreen = true
+         //   trace(nsm.stage.width)
+          //  trace(nsm.stage.height)
+			}
+			private function onPlay(eve:Event):void
+			{ 
+				//trace(mvd.nsm.state)  
+			 if(nsm.state == NSComponent.UNLOAD)
+				  return
+				if(nsm.state == NSComponent.PLAY)
+				 {
+				 nsm.pause()
+				 pb.label = "play"
+				 this.cm.pause()
+				 }
+				else
+				{
+				 nsm.play()
+				 pb.label = "pause"
+				 this.cm.resume()
+				}
+			}
+			private function onStop(eve:Event):void
+			{   
+			 if(nsm.state == NSComponent.UNLOAD||nsm.state == NSComponent.STOP)
+				  return
+				nsm.stop()  
+				ps.value = 0
+				this.cm.resetTime(0)
+				this.pb.label = "play"
+				//mvd.nsm.close()
+				//ps.value = 0
+				//bp.setProgress(0,1)
+			//	bp.label = "CurrentLoad 0%"
+			}
+			private function onSM(eve:Event):void
+			{
+				if(smb.selected)
+				 {
+				 nsm.smoothing = true
+				// smb.label = "sm"
+				 }
+				else
+				{
+				 nsm.smoothing = false
+			//	 smb.label = "us" 
+				}
+			}
+		private function soundAdjust(eve:SliderEvent):void
+		{
+			    nsm.volume = eve.value
+		}
+		 private function onProgress(eve:NMEvent):void
+        {
+        	var loaded:Number = Number(eve.info)
+        	//trace("b:"+loaded)
+        	bp.setProgress(Number(eve.info),1)
+        	bp.label = "CurrentLoad "+ Math.round(loaded * 100)+"%" 
+        }
+        private function onPlayHeadChange(eve:NMEvent):void
+        {    
+             //	trace("p:"+eve.info)
+        	ps.value =uint(eve.info)
+        	var time:int = Math.floor(ps.value/1000) -1
+        	tl.text =  time +"/"+ tot
+        	if(cob.selected)
+        	 this.cm.displayComments(time)
+        }
+        private function onPlaying(eve:SliderEvent):void
+        {
+        	if(pb.enabled == false)
+        	      {
+        	      this.ps.value = 0	
+        	      return 
+        	      }
+        	var time:uint = Math.floor(eve.value)
+        	//trace(time)
+        	nsm.seek(time);
+        	cm.resetTime(time/1000)
+        }
+        private function refresh(eve:NMEvent):void
+        {
+        	this.pb.label = "play"
+        	cm.resetTime(0)
+        }
+        private function fsHandler(eve:FullScreenEvent):void
+        {
+      //  trace("fs:"+eve.fullScreen)	
+         if(eve.fullScreen)	
+         {
+         	this.cm.fullScreen = true
+         }
+         else
+         {
+         	this.cm.fullScreen = false
+         }
+        }
+        private function reTime(eve:Event):void
+        {
+        	this.cm.resetTime(this.ps.value/1000)
+        }
+        private function onNotFound(eve:NMEvent):void
+        {
+        	Alert.show("Oops: Video Not Found TAT")
+        }
+        private function onOpen(eve:Event):void
+        {
+        	ll.openFile()
+        }
+        private function onLocalLoad(eve:LoadEvent):void
+        {
+        	var lif:LocalInfo = LocalInfo(eve.info)
+        	this.loadURL(lif.url,lif.cds)
+        }
+        ]]>
+	</mx:Script>
+	<local:NSComponent x="-1" y="0" height="429" width="530" id="nsm"/>
+   	<mx:Button x="87" y="514" label="stop" id="sb" click="onStop(event)"/>
+	<mx:ProgressBar x="10" y="457" width="508" height="11" id="bp" labelPlacement="bottom" themeColor="black"
+            minimum="0" visible="true" maximum="1" label="CurrentLoad 0%" 
+            direction="right" mode="manual"/>
+	<mx:HSlider x="10" y="437" width="508" id="ps" minimum="0" change="onPlaying(event)" enabled="false"/>
+	<mx:Button x="333" y="514" label="FS" id="fb" click="onFS(event)"/>
+	<mx:HSlider x="383" y="514" minimum="0" maximum="1" change="soundAdjust(event)" width="135" value="0.7" id="vs" enabled="false"/>
+	<mx:Label x="421" y="476" text="0/0" width="97" id="tl"/>
+	<mx:TextInput x="10" y="486" id ="input"/>
+	<mx:Button x="168" y="514" label="load" id="lb" click="onLoad(event)"/>
+	<mx:Button x="10" y="514" label="play" id="pb" click="onPlay(event)"/>
+	<mx:CheckBox x="178" y="486" label="ensure" id="ec"/>
+	<mx:Button x="246" y="514" label="open" id="opb" click="onOpen(event)"/>
+	<mx:CheckBox x="258" y="486" label="con/coff" id="cob" selected="true" click="reTime(event)" enabled="false"/>
+	<mx:CheckBox x="333" y="486" label="sm" id="smb" click="onSM(event)"/>
+</mx:WindowedApplication>
