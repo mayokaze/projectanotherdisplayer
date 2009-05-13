@@ -1,0 +1,31 @@
+<!-->invalid<-->
+<?xml version="1.0" encoding="utf-8"?>
+<mx:UIComponent xmlns:mx="http://www.adobe.com/2006/mxml" initialize="init()" themeColor="black">
+<mx:Script>
+	<![CDATA[
+	  import org.tamaki.events.*
+	  import org.tamaki.video.*
+	  import flash.media.Video
+	  import flash.events.*
+	  
+	  
+      public var video:Video;
+	  public var nsm:NSComponent;
+		private function init():void
+		{    
+			
+		//trace("init comp")
+		  // nsm = NSManager.getInstance()
+		 //   var t:NS = new NS()
+               nsm = new NSComponent()
+			video = nsm.video
+			video.height = this.height 
+			video.width = this.width
+			this.addChild(video)
+        }
+
+
+	]]>
+</mx:Script>
+	
+</mx:UIComponent>
